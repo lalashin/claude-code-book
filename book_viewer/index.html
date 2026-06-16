@@ -399,7 +399,10 @@
     var FLIP_TRIGGER = 0.28;   // 폭의 28% 이상 끌면 넘김 확정
     var SWIPE_PX     = 50;
     var VELOCITY_FLICK = 0.5;  // px/ms
-    var DRAG_THRESHOLD = 8;
+    var DRAG_THRESHOLD = 8;    // 축 결정 임계(px)
+    var FLIP_MIN_PX  = 50;     // 데스크탑 페이지 넘김 최소 드래그 거리
+    var MOBILE_EDGE_RATIO = 0.25;  // 모바일 스와이프 시작 존: 좌우 각 25%
+    var MOBILE_MIN_PX = 60;        // 모바일 스와이프 최소 거리
 
     var book       = document.getElementById('book');
     var pageLeft   = document.getElementById('pageLeft');
@@ -792,13 +795,23 @@
       var rect = book.getBoundingClientRect();
       var localX = e.clientX - rect.left;
       var rightHalf = localX > rect.width/2;
-      try{ book.setPointerCapture(e.pointerId); }catch(_){}
+
+      if (isMobile()){
+        // 모바일: 좌우 가장자리 25% 구간에서만 스와이프 감지
+        var edgeW = rect.width * MOBILE_EDGE_RATIO;
+        var inLeftEdge  = localX < edgeW;
+        var inRightEdge = localX > rect.width - edgeW;
+        if (!inLeftEdge && !inRightEdge){ return; }
+      } else {
+        // 데스크탑: 본문 텍스트 영역 드래그는 텍스트 선택 전용
+        if (e.target.closest('.page__content')){ return; }
+      }
+
       state.drag = {
         active:true, side:null, startX:e.clientX, startY:e.clientY,
         dx:0, axisLocked:null, t0:performance.now(), moved:false, p:0,
-        startRightHalf:rightHalf
+        startRightHalf:rightHalf, pointerId:e.pointerId
       };
-      book.classList.add('is-dragging');
     }
 
     function onMove(e){
@@ -814,11 +827,18 @@
         cancelDrag();
         return;
       }
+      // 드래그 확정 시점에 캡처 + 클래스 부여 (단순 클릭에는 실행 안 됨)
+      if (!d.moved){
+        try{ book.setPointerCapture(d.pointerId); }catch(_){}
+        book.classList.add('is-dragging');
+      }
       d.moved = true;
       d.dx = dx;
       var w = book.clientWidth || 1;
 
       if (isMobile()){
+        // 최소 60px 이상 끌어야 페이지 이동 시각 반응 시작
+        if (Math.abs(dx) < MOBILE_MIN_PX) return;
         var pm = Math.max(-1, Math.min(1, dx / w));
         // 경계 저항
         if ((state.spread === 0 && pm > 0) || (state.spread === spreadCount()-1 && pm < 0)) pm *= 0.3;
@@ -829,8 +849,9 @@
         return;
       }
 
-      // 데스크탑: 방향에 따라 잎 결정
+      // 데스크탑: FLIP_MIN_PX 이상 끌었을 때만 페이지 넘김 진입 (텍스트 선택 드래그와 구분)
       if (!d.side){
+        if (Math.abs(dx) < FLIP_MIN_PX) return;
         if (dx < 0){
           if (!prepDragLeaf('next')){ cancelDrag(); return; }
           d.side = 'next';
@@ -861,11 +882,16 @@
       d.active = false;
       book.classList.remove('is-dragging');
 
+      // 단순 클릭(드래그 없음) — 아무것도 하지 않고 종료
+      if (!d.moved){ return; }
+
       var w = book.clientWidth || 1;
       var dt = Math.max(1, performance.now() - d.t0);
       var v = d.dx / dt; // px/ms
 
       if (isMobile()){
+        // 최소 거리 미달이면 원위치 (onMove에서 시각 반응 없었으므로 그냥 종료)
+        if (Math.abs(d.dx) < MOBILE_MIN_PX){ settleMobile(); return; }
         var pNext = (d.p < -FLIP_TRIGGER) || (v < -VELOCITY_FLICK) || (d.dx < -SWIPE_PX && v < -0.15);
         var pPrev = (d.p >  FLIP_TRIGGER) || (v >  VELOCITY_FLICK) || (d.dx >  SWIPE_PX && v >  0.15);
         if (pNext && state.spread < spreadCount()-1){ pageRight.style.transition=''; mobileCommit(1); }
@@ -950,12 +976,11 @@
       d.active = false;
       if (isMobile()){ settleMobile(); }
       else if (d.side){
-        // 잎을 원위치로 살짝 되돌림
+        // 잎을 원위치로 되돌림 (renderSpread 호출 없이 — 불필요한 재렌더가 흔들림 유발)
         var leaf = d.side === 'next' ? leafRight : leafLeft;
         leaf.style.transition = '';
         leaf.style.transform = 'rotateY(0deg)';
         setShade(leaf, 0);
-        renderSpread(state.spread);
         setTimeout(function(){ resetLeaves(); book.classList.remove('is-flipping'); }, parseInt(getCSSdur(),10)+50);
       }
     }
@@ -1110,7 +1135,7 @@
       });
 
       if (window.matchMedia('(hover:none)').matches){
-        document.getElementById('footHint').textContent = '스와이프 · ← → 키로 넘기기';
+        document.getElementById('footHint').textContent = '좌우 가장자리 스와이프로 넘기기';
       }
     }
 

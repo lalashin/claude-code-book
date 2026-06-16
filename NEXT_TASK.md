@@ -30,6 +30,35 @@ git push -u origin main
 - [ ] GitHub Pages 배포 후 온라인에서 두 페이지 뷰어 동작 확인
 - [ ] 모바일 브라우저에서 터치 스와이프 확인
 
+## 완료된 작업 이력
+
+### 2026-06-16 — 책 뷰어 드래그 오류 수정 (PC + 모바일)
+
+**[1차] PC 클릭 시 화면 흔들림 + 텍스트 복사 불가**
+
+원인:
+1. `pointerdown`이 책 전체에 걸려 단순 클릭에도 flip-leaf 나타났다 사라짐
+2. `setPointerCapture`가 텍스트 선택 동작을 차단
+3. `onUp`에서 `d.moved` 체크 없이 `revertDragLeaf()` 실행
+
+수정:
+- `onDown`에서 `.page__content` 감지 시 즉시 리턴 (본문 영역 드래그 제외)
+- `setPointerCapture`를 `onMove` 드래그 확정 시점으로 이동
+- `onUp`에서 `d.moved === false`이면 즉시 리턴
+- `FLIP_MIN_PX = 50px` 추가 — 50px 미만 드래그는 넘김 미진입
+- `cancelDrag`에서 불필요한 `renderSpread` 호출 제거
+
+**[2차] 모바일 가장자리 오감지**
+
+원인: 어디서든 8px 드래그만 해도 페이지 넘김 진입
+
+수정 (C방안 — 존 제한 + 최소 거리):
+- `MOBILE_EDGE_RATIO = 0.25` — 좌우 가장자리 25% 구간에서만 스와이프 감지
+- `MOBILE_MIN_PX = 60` — 60px 이상 끌어야 넘김 시작
+- 하단 힌트 텍스트: "좌우 가장자리 스와이프로 넘기기"로 변경
+
+---
+
 ## 참고
 
 - 배포 환경(http)에서는 `fetch('./book_draft.md')` 경로도 동작 가능
