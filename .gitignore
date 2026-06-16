@@ -1,0 +1,15 @@
+# 작업 중간 산출물
+_workspace/
+
+# bkit 상태 파일
+.bkit/
+
+# Claude 에이전트/스킬 (로컬 전용)
+.claude/
+
+# PDF (용량 큼, 원고 md에서 재생성 가능)
+manuscript/book_draft.pdf
+
+# OS
+.DS_Store
+Thumbs.db
