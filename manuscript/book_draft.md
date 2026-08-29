@@ -224,7 +224,7 @@ Step 1: PowerShell을 열고 아래 명령어를 **마우스 오른쪽 클릭** 
 irm https://claude.ai/install.ps1 | iex
 ```
 
-> `irm`은 설치 스크립트를 내려받고, `iex`는 그것을 즉시 실행합니다. Node.js나 다른 도구를 별도로 설치할 필요가 없습니다.
+> `irm`은 설치 스크립트를 내려받고, `iex`는 그것을 즉시 실행합니다. Node.js나 다른 도구를 별도로 설치할 필요가 없습니다. 이 방식으로 설치하면 **Claude Code가 자동으로 최신 버전으로 업데이트**됩니다.
 
 이렇게 나오면 성공!
 ```
@@ -260,7 +260,7 @@ Step 1: 터미널을 열고 아래 명령어를 붙여넣고 Enter를 누르세�
 curl -fsSL https://claude.ai/install.sh | sh
 ```
 
-> `curl`은 설치 스크립트를 내려받고, `sh`는 그것을 즉시 실행합니다. Node.js나 다른 도구를 별도로 설치할 필요가 없습니다. Apple Silicon(M1/M2/M3)과 Intel Mac 모두 자동으로 맞는 버전이 설치됩니다.
+> `curl`은 설치 스크립트를 내려받고, `sh`는 그것을 즉시 실행합니다. Node.js나 다른 도구를 별도로 설치할 필요가 없습니다. Apple Silicon(M1/M2/M3)과 Intel Mac 모두 자동으로 맞는 버전이 설치됩니다. 이 방식으로 설치하면 **Claude Code가 자동으로 최신 버전으로 업데이트**됩니다.
 
 이렇게 나오면 성공!
 ```
@@ -713,12 +713,25 @@ AI가 이걸 못 하는 건 아닙니다. 하지만 한 번에 너무 많은 걸
 
 *큰 작업을 3단계로 쪼개서 하나씩 확인하며 진행*
 
-```
-1단계 ──▶ 2단계 ──▶ 3단계
-폴더 만들기   일정표 만들기   예산표 만들기
-   │            │             │
- 확인 ✓       확인 ✓        확인 ✓
-```
+<div style="margin:1em 0;display:flex;align-items:stretch;gap:0;">
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:rgba(154,91,52,.07);border:1px solid #d8cbb0;border-radius:8px 0 0 8px;text-align:center;">
+    <div style="font-size:11px;color:#6b6051;font-weight:700;">1단계</div>
+    <div style="font-size:13px;font-weight:600;">폴더 만들기</div>
+    <div style="font-size:13px;color:#5a9e5a;">✓ 확인</div>
+  </div>
+  <div style="display:flex;align-items:center;padding:0 6px;color:#9a5b34;font-size:18px;">▶</div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:rgba(154,91,52,.07);border-top:1px solid #d8cbb0;border-bottom:1px solid #d8cbb0;text-align:center;">
+    <div style="font-size:11px;color:#6b6051;font-weight:700;">2단계</div>
+    <div style="font-size:13px;font-weight:600;">일정표 만들기</div>
+    <div style="font-size:13px;color:#5a9e5a;">✓ 확인</div>
+  </div>
+  <div style="display:flex;align-items:center;padding:0 6px;color:#9a5b34;font-size:18px;">▶</div>
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 8px;background:rgba(154,91,52,.07);border:1px solid #d8cbb0;border-radius:0 8px 8px 0;text-align:center;">
+    <div style="font-size:11px;color:#6b6051;font-weight:700;">3단계</div>
+    <div style="font-size:13px;font-weight:600;">예산표 만들기</div>
+    <div style="font-size:13px;color:#5a9e5a;">✓ 확인</div>
+  </div>
+</div>
 
 ---
 
@@ -1701,13 +1714,30 @@ messy-downloads 폴더를 살펴봤습니다. 다음과 같이 정리하길 제�
 
 그 패턴은 이렇습니다:
 
-```
-   ① 만들어달라고 한다  →  ② 실행해서 결과를 본다  →  ③ 고쳐달라고 한다
-        (요청)                  (확인)                   (수정)
-          ▲                                                 │
-          └─────────────────────────────────────────────────┘
-                        마음에 들 때까지 반복
-```
+<div style="margin:1.2em 0;font-family:inherit;">
+  <div style="display:flex;align-items:stretch;gap:0;">
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;background:rgba(154,91,52,.08);border:1px solid #d8cbb0;border-radius:8px 0 0 8px;text-align:center;">
+      <div style="font-size:20px;">①</div>
+      <div style="font-size:13px;font-weight:700;">만들어달라고 한다</div>
+      <div style="font-size:11px;color:#6b6051;">(요청)</div>
+    </div>
+    <div style="display:flex;align-items:center;padding:0 6px;color:#9a5b34;font-size:20px;">→</div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;background:rgba(154,91,52,.08);border-top:1px solid #d8cbb0;border-bottom:1px solid #d8cbb0;text-align:center;">
+      <div style="font-size:20px;">②</div>
+      <div style="font-size:13px;font-weight:700;">실행해서 결과를 본다</div>
+      <div style="font-size:11px;color:#6b6051;">(확인)</div>
+    </div>
+    <div style="display:flex;align-items:center;padding:0 6px;color:#9a5b34;font-size:20px;">→</div>
+    <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;background:rgba(154,91,52,.08);border:1px solid #d8cbb0;border-radius:0 8px 8px 0;text-align:center;">
+      <div style="font-size:20px;">③</div>
+      <div style="font-size:13px;font-weight:700;">고쳐달라고 한다</div>
+      <div style="font-size:11px;color:#6b6051;">(수정)</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;justify-content:center;margin-top:6px;gap:4px;color:#9a5b34;font-size:12px;font-weight:600;">
+    <span>↺</span><span>마음에 들 때까지 반복</span>
+  </div>
+</div>
 
 전문 개발자도 사실 똑같이 일합니다. 한 번에 완벽한 결과물을 만드는 사람은 없어요. **만들고, 돌려보고, 고치고**를 수십 번 반복하면서 완성해 갑니다.
 

@@ -230,8 +230,9 @@
       background:var(--code-bg); color:var(--code-ink);
       padding:15px 17px; border-radius:10px; border:1px solid var(--code-rule);
       overflow-x:auto; margin:1em 0;
-      font-family:"D2Coding","Consolas","Menlo",monospace; font-size:13px; line-height:1.65;
-      scrollbar-width:thin;
+      font-family:"D2Coding","Malgun Gothic","Apple SD Gothic Neo","Consolas","Menlo",monospace;
+      font-size:13px; line-height:1.65;
+      scrollbar-width:thin; white-space:pre;
     }
     .page__content pre code{ background:none; color:inherit; padding:0; font-size:inherit; }
     .page__content pre::-webkit-scrollbar{ height:8px; }
@@ -248,6 +249,53 @@
     .page__content blockquote p{ margin:.3em 0; }
     .page__content em{ color:var(--ink-soft); }
     .page__content img{ max-width:100%; height:auto; border-radius:6px; }
+
+    /* ============================================================
+       Mermaid 다이어그램
+       ============================================================ */
+    .page__content .mermaid{
+      display:flex; justify-content:center; align-items:center;
+      margin:1.2em 0; padding:16px 12px; overflow-x:auto;
+      background:rgba(154,91,52,.05); border:1px solid var(--rule);
+      border-radius:10px;
+    }
+    .page__content .mermaid svg{
+      max-width:100%; height:auto;
+      font-family:"Pretendard","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    }
+    [data-theme="dark"] .page__content .mermaid{ background:rgba(255,255,255,.04); }
+
+    /* ASCII 박자 비교표 → HTML 카드 변환 스타일 */
+    .박자-compare{
+      display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;
+      margin:1em 0;
+    }
+    .박자-compare__col{
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+    }
+    .박자-compare__label{
+      font-size:12px; color:var(--ink-soft); text-align:center; line-height:1.3;
+    }
+    .박자-compare__arrow{ font-size:18px; color:var(--ink-soft); }
+    .박자-compare__box{
+      width:100%; padding:10px 8px; border-radius:8px;
+      border:1px solid var(--rule); background:var(--paper-edge);
+      text-align:center; font-size:13px; font-weight:600; color:var(--ink);
+    }
+    .박자-compare__box--exact{
+      border-color:var(--accent); background:rgba(154,91,52,.12); color:var(--accent);
+    }
+
+    /* highlight.js 코드 블록 오버라이드 — 책 테마와 통합 */
+    .page__content pre code.hljs{
+      background:transparent; padding:0; font-size:inherit; color:inherit;
+    }
+    .page__content pre{ position:relative; }
+    .page__content pre .hljs-comment,.page__content pre .hljs-quote{ color:#8b9a6e; }
+    .page__content pre .hljs-keyword,.page__content pre .hljs-selector-tag{ color:#c79fd9; }
+    .page__content pre .hljs-string,.page__content pre .hljs-attr{ color:#98c379; }
+    .page__content pre .hljs-number{ color:#d19a66; }
+    .page__content pre .hljs-built_in{ color:#61afef; }
 
     /* ============================================================
        5. 좌우 클릭 핫존
@@ -381,8 +429,44 @@
 
   <!-- 스크립트: vendor → 데이터 → 앱 순 -->
   <script src="./vendor/marked.min.js"></script>
+  <!-- Mermaid 다이어그램 렌더러 -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <!-- highlight.js 코드 문법 강조 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/languages/bash.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/languages/javascript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/languages/json.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/languages/yaml.min.js"></script>
   <script src="./book-data.js"></script>
   <script>
+  /* Mermaid 전역 초기화 (테마 연동) */
+  (function(){
+    function getMermaidTheme(){
+      return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'neutral';
+    }
+    function initMermaid(){
+      if (typeof mermaid === 'undefined') return;
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: getMermaidTheme(),
+        fontFamily: '"Pretendard","Apple SD Gothic Neo","Noto Sans KR",sans-serif',
+        fontSize: 14,
+        flowchart: { curve: 'basis', htmlLabels: true },
+        themeVariables: {
+          primaryColor: '#9a5b34',
+          primaryTextColor: '#2c2620',
+          primaryBorderColor: '#c0894e',
+          lineColor: '#6b6051',
+          secondaryColor: '#f3ecdc',
+          tertiaryColor: '#faf8f3'
+        }
+      });
+    }
+    window.__initMermaid = initMermaid;
+    window.__getMermaidTheme = getMermaidTheme;
+  })();
+
   (function(){
     "use strict";
 
@@ -504,6 +588,49 @@
     /* ============================================================
        마크다운 렌더
        ============================================================ */
+    function preProcessMarkdown(md){
+      // 터미널 흐름 ASCII 다이어그램을 HTML 카드로 교체
+      var ASCII_TERMINAL = /```[\r\n]+[ \t]*나[ \t]*─+[^\n]*터미널[\s\S]*?```/;
+      if (ASCII_TERMINAL.test(md)){
+        var termCard =
+          '<div style="margin:1em 0;padding:14px 16px;background:var(--code-bg);border-radius:10px;border:1px solid var(--code-rule);font-size:13px;color:var(--code-ink);">' +
+            '<div style="display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center;">' +
+              '<div style="padding:8px 14px;border:1px solid #5a4f3a;border-radius:8px;text-align:center;min-width:60px;">나</div>' +
+              '<div style="padding:0 8px;color:#8b9a6e;text-align:center;font-size:12px;">텍스트 명령 입력<br><span style="color:#98c379;font-family:monospace;">mkdir 새폴더</span><br>──────▶</div>' +
+              '<div style="padding:8px 14px;border:1px solid var(--accent);border-radius:8px;text-align:center;min-width:70px;color:var(--accent-2);">터미널</div>' +
+              '<div style="padding:0 8px;color:#8b9a6e;text-align:center;font-size:12px;">──────▶</div>' +
+              '<div style="padding:8px 14px;border:1px solid #5a4f3a;border-radius:8px;text-align:center;min-width:80px;">컴퓨터<br><span style="font-size:11px;color:#8b9a6e;">(폴더 생성)</span></div>' +
+            '</div>' +
+            '<div style="margin-top:10px;text-align:center;color:#8b9a6e;font-size:12px;">◀────────────── 결과 출력: &ldquo;생성 완료&rdquo; ──────────────</div>' +
+          '</div>';
+        md = md.replace(ASCII_TERMINAL, termCard);
+      }
+
+      // 3박자 ASCII 비교 다이어그램을 HTML 카드로 교체
+      var ASCII_3BAKJA = /```[\r\n]+[ \t]*맥락만[^\n]*\n[\s\S]*?```/;
+      if (ASCII_3BAKJA.test(md)){
+        var card = '<div class="박자-compare">' +
+          '<div class="박자-compare__col">' +
+            '<div class="박자-compare__label">맥락만<br>"정리 좀..."</div>' +
+            '<div class="박자-compare__arrow">↓</div>' +
+            '<div class="박자-compare__box">???<br><small style="font-weight:400;color:var(--ink-soft)">헤맴</small></div>' +
+          '</div>' +
+          '<div class="박자-compare__col">' +
+            '<div class="박자-compare__label">맥락 + 목표<br>"목록 만들어줘"</div>' +
+            '<div class="박자-compare__arrow">↓</div>' +
+            '<div class="박자-compare__box">대략<br><small style="font-weight:400;color:var(--ink-soft)">맞음</small></div>' +
+          '</div>' +
+          '<div class="박자-compare__col">' +
+            '<div class="박자-compare__label">맥락 + 목표 + 제약<br>"체크박스로"</div>' +
+            '<div class="박자-compare__arrow">↓</div>' +
+            '<div class="박자-compare__box박자-compare__box--exact" style="border-color:var(--accent);background:rgba(154,91,52,.12);color:var(--accent);width:100%;padding:10px 8px;border-radius:8px;border-width:1px;border-style:solid;text-align:center;font-size:13px;font-weight:600;">정확<br><small style="font-weight:400;">적중!</small></div>' +
+          '</div>' +
+        '</div>';
+        md = md.replace(ASCII_3BAKJA, card);
+      }
+      return md;
+    }
+
     function renderMarkdown(mdText){
       if (typeof window.marked === 'undefined'){
         var esc = String(mdText).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -512,12 +639,43 @@
       try{
         if (window.marked.setOptions){ window.marked.setOptions({ gfm:true, breaks:false }); }
         var fn = window.marked.parse || window.marked;
-        return fn(mdText);
+        return fn(preProcessMarkdown(mdText));
       }catch(e){ return '<p>렌더 오류: ' + String(e.message || e) + '</p>'; }
     }
 
     function escapeHtml(s){
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    /* Mermaid + highlight.js 후처리 — 페이지 DOM 삽입 후 호출 */
+    var _mermaidId = 0;
+    function postProcessDiagrams(root){
+      // 1) highlight.js: 언어가 명시된 코드 블록만 처리 (ASCII 다이어그램 등 language-* 없는 블록 제외)
+      if (typeof hljs !== 'undefined'){
+        var codeEls = root.querySelectorAll('pre code[class*="language-"]:not(.language-mermaid)');
+        for (var i=0; i<codeEls.length; i++){
+          hljs.highlightElement(codeEls[i]);
+        }
+      }
+
+      // 2) Mermaid: ```mermaid 블록을 .mermaid div로 교체 후 렌더
+      if (typeof mermaid === 'undefined') return;
+      var mermaidEls = root.querySelectorAll('code.language-mermaid');
+      if (mermaidEls.length === 0) return;
+
+      mermaidEls.forEach(function(codeEl){
+        var pre = codeEl.parentNode;
+        var graphDef = codeEl.textContent || '';
+        var div = document.createElement('div');
+        div.className = 'mermaid';
+        div.setAttribute('data-mermaid-id', 'mg-' + (++_mermaidId));
+        div.textContent = graphDef;
+        if (pre && pre.parentNode) pre.parentNode.replaceChild(div, pre);
+      });
+
+      try {
+        mermaid.run({ nodes: root.querySelectorAll('.mermaid') });
+      } catch(e) { /* 렌더 실패 시 텍스트 폴백 유지 */ }
     }
 
     /* 한 페이지의 내부 HTML(.page__inner 내용)을 생성 */
@@ -551,6 +709,7 @@
       else if (p.isCover) el.classList.add('is-cover');
       el.innerHTML = pageInnerHtml(idx);
       postProcessLinks(el);
+      postProcessDiagrams(el);
       var c = el.querySelector('.page__content'); if (c) c.scrollTop = 0;
     }
 
@@ -567,6 +726,7 @@
       else if (p.isCover) faceEl.classList.add('is-cover');
       faceEl.innerHTML = pageInnerHtml(idx);
       postProcessLinks(faceEl);
+      postProcessDiagrams(faceEl);
     }
 
     function postProcessLinks(root){
@@ -1111,6 +1271,9 @@
         var cur = document.documentElement.getAttribute('data-theme');
         if (cur === 'dark'){ document.documentElement.removeAttribute('data-theme'); }
         else { document.documentElement.setAttribute('data-theme','dark'); }
+        // Mermaid 테마 재초기화 후 현재 스프레드 재렌더
+        if (typeof window.__initMermaid === 'function') window.__initMermaid();
+        renderSpread(state.spread);
       });
 
       // 리사이즈 → 모바일/데스크탑 전환 시 현재 위치 유지하며 재계산
@@ -1153,6 +1316,7 @@
        초기화
        ============================================================ */
     function boot(){
+      if (typeof window.__initMermaid === 'function') window.__initMermaid();
       loadMarkdown().then(function(md){
         var body = splitIntoPages(md);
         var titlePage = {
