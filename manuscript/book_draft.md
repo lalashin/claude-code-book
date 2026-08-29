@@ -1973,10 +1973,31 @@ my-web 폴더에 clock.html 파일을 만들어줘.
 
 그리고 우리에게는 비밀 무기가 있습니다. **그 쪽지를 그대로 AI에게 보여주면, AI가 읽고 고쳐줍니다.**
 
-```
-   에러 발생  →  에러 메시지 복사  →  AI에게 그대로 붙여넣기  →  AI가 원인 진단 + 수정
-   (당황 ❌)      (단서 수집)          ("이 에러 고쳐줘")        (해결 ✅)
-```
+<div style="margin:1.2em 0;display:flex;flex-wrap:wrap;align-items:stretch;justify-content:center;gap:6px 0;">
+  <div style="flex:1 1 0;min-width:88px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:5px;padding:11px 8px;background:rgba(154,91,52,.07);border:1px solid var(--rule,#d8cbb0);border-radius:8px;text-align:center;">
+    <div style="font-size:15px;color:var(--ink-soft,#6b6051);line-height:1;">①</div>
+    <div style="font-size:13px;font-weight:700;line-height:1.35;">에러 발생</div>
+    <div style="font-size:12px;color:var(--ink-soft,#6b6051);line-height:1.35;">당황 ❌</div>
+  </div>
+  <div style="display:flex;align-items:center;padding:0 5px;color:var(--accent,#9a5b34);font-size:17px;">→</div>
+  <div style="flex:1 1 0;min-width:88px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:5px;padding:11px 8px;background:rgba(154,91,52,.07);border:1px solid var(--rule,#d8cbb0);border-radius:8px;text-align:center;">
+    <div style="font-size:15px;color:var(--ink-soft,#6b6051);line-height:1;">②</div>
+    <div style="font-size:13px;font-weight:700;line-height:1.35;">에러 메시지<br>복사</div>
+    <div style="font-size:12px;color:var(--ink-soft,#6b6051);line-height:1.35;">단서 수집</div>
+  </div>
+  <div style="display:flex;align-items:center;padding:0 5px;color:var(--accent,#9a5b34);font-size:17px;">→</div>
+  <div style="flex:1 1 0;min-width:88px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:5px;padding:11px 8px;background:rgba(154,91,52,.07);border:1px solid var(--rule,#d8cbb0);border-radius:8px;text-align:center;">
+    <div style="font-size:15px;color:var(--ink-soft,#6b6051);line-height:1;">③</div>
+    <div style="font-size:13px;font-weight:700;line-height:1.35;">AI에게 그대로<br>붙여넣기</div>
+    <div style="font-size:12px;color:var(--ink-soft,#6b6051);line-height:1.35;">&ldquo;이 에러 고쳐줘&rdquo;</div>
+  </div>
+  <div style="display:flex;align-items:center;padding:0 5px;color:var(--accent,#9a5b34);font-size:17px;">→</div>
+  <div style="flex:1 1 0;min-width:88px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:5px;padding:11px 8px;background:rgba(154,91,52,.14);border:1px solid var(--accent,#9a5b34);border-radius:8px;text-align:center;">
+    <div style="font-size:15px;color:var(--ink-soft,#6b6051);line-height:1;">④</div>
+    <div style="font-size:13px;font-weight:700;color:var(--accent,#9a5b34);line-height:1.35;">AI가 원인 진단<br>+ 수정</div>
+    <div style="font-size:12px;color:var(--ink-soft,#6b6051);line-height:1.35;">해결 ✅</div>
+  </div>
+</div>
 
 여러분이 할 일은 단 하나. **에러 메시지를 그대로 AI에게 넘기는 것.** 에러의 뜻을 이해할 필요도, 원인을 분석할 필요도 없습니다. 그건 AI의 몫입니다.
 

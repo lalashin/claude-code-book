@@ -3,8 +3,8 @@
 ## 작업 순서
 
 ### 0. 사전 준비 (Claude가 대신 생성 — 세션 시작 시 요청)
-- [ ] `.gitignore` 생성 (`_workspace/`, `.bkit/`, `.claude/` 등 제외)
-- [ ] `README.md` 작성 (포트폴리오용 소개, 뷰어 링크, 스크린샷 안내)
+- [x] `.gitignore` 생성 (`_workspace/`, `.bkit/`, `.claude/` 등 제외)
+- [x] `README.md` 작성 (포트폴리오용 소개, 뷰어 링크, 스크린샷 안내)
 
 ### 1. GitHub 저장소 생성
 - GitHub에서 새 저장소 생성 (예: `claude-code-book`)
@@ -26,11 +26,40 @@ git push -u origin main
 - 배포 URL: `https://{사용자명}.github.io/claude-code-book/`
 
 ### 4. 확인 사항
-- [ ] `book_viewer/index.html` 로컬 더블클릭 정상 동작 확인
+- [x] 로컬 서버(:8765) 렌더링 확인 — `file://` 더블클릭 방식은 미확인
 - [ ] GitHub Pages 배포 후 온라인에서 두 페이지 뷰어 동작 확인
 - [ ] 모바일 브라우저에서 터치 스와이프 확인
 
 ## 완료된 작업 이력
+
+### 2026-08-29 — 뷰어 시각 요소 강화 + 챕터 4.4 에러 흐름 시각화
+
+**[1차] Mermaid·코드 하이라이팅 도입** (커밋 `f4341d4`)
+- mermaid@10 렌더러 추가 — 다크/라이트 테마 연동, 책 팔레트(`themeVariables`) 적용
+- highlight.js@11.9 추가 (bash/js/json/yaml) + 책 테마에 맞춘 색상 오버라이드
+- `preProcessMarkdown()` — 터미널 흐름·3박자 비교 ASCII를 HTML 카드로 치환
+- `postProcessDiagrams()` — 페이지 DOM 삽입 후 `mermaid.run()` + `hljs.highlightElement()`
+- 코드블록 한글 폰트 폴백 추가 (Malgun Gothic / Apple SD Gothic Neo)
+- 원고: 챕터 2 단계 나누기, 챕터 4 만들기-확인-수정 루프 → HTML 카드 전환
+
+**[2차] 챕터 4.4 "에러는 단서" 흐름 시각화** (뷰어 42페이지)
+
+원인: ASCII 한 줄이 약 70자여서 `white-space:pre` 코드블록이 페이지 폭을 초과.
+독자가 가로 스크롤을 해야만 마지막 `해결 ✅`이 보여, 이 절의 핵심 메시지가 화면에서 잘렸다.
+
+수정:
+- 4단계 파이프라인 HTML 카드로 교체 (①에러 발생 → ②메시지 복사 → ③붙여넣기 → ④진단·수정)
+- `flex:1 1 0` + `min-width:88px` — 500px↑ 4열 1줄 / 380px↓ 2+2 접힘, 가로 스크롤 0
+- `var(--rule)` `var(--ink-soft)` `var(--accent)` + hex 폴백 → 다크모드 자동 대응
+- ④만 accent 테두리·배경으로 강조 (흐름의 종착점 각인)
+
+시행착오: 최초 `flex:1 1 126px`로 작성 → 카드 4개가 페이지 폭을 넘겨 ④가 잘림.
+`flex-basis`를 0으로 바꿔(기존 챕터 2·4 카드와 동일 방식) 해결.
+
+검증 방법:
+- Chrome 확장이 `file://`을 차단 → 임시 로컬 서버(node, :8765)로 띄워 확인
+- 실측 `scrollWidth === clientWidth`(오버플로 없음), 컨테이너 폭 300/330/380/500px에서 행 수 확인
+- 라이트·다크 양쪽 렌더링 확인 후 서버·탭·테마 원복
 
 ### 2026-06-16 — 책 뷰어 드래그 오류 수정 (PC + 모바일)
 
@@ -56,6 +85,15 @@ git push -u origin main
 - `MOBILE_EDGE_RATIO = 0.25` — 좌우 가장자리 25% 구간에서만 스와이프 감지
 - `MOBILE_MIN_PX = 60` — 60px 이상 끌어야 넘김 시작
 - 하단 힌트 텍스트: "좌우 가장자리 스와이프로 넘기기"로 변경
+
+---
+
+## 미결 사항
+
+| 항목 | 내용 | 판단 필요 |
+|------|------|----------|
+| CDN 의존 | mermaid·highlight.js를 jsdelivr에서 로드 → 오프라인 `file://`에서는 다이어그램·하이라이팅 누락. README의 "완전 오프라인" 문구와 불일치 | `vendor/` 동봉 vs README 문구 조정 |
+| chapters/ 드리프트 | 카드 전환이 `manuscript/book_draft.md`에만 적용됨. `chapters/chapter_02·04.md`에는 원본 ASCII 잔존 | 동기화 여부 |
 
 ---
 
